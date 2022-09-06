@@ -11,36 +11,47 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variável que controla o espaço disponível
     let espacoDisponivel = 1;
 
-    // Inicializando variável que vai receber a palavra correta
-    let word;
-    let contagemPalavrasAdivinhadas = 0;
+    // PARA USO COM A API
+    //let word;
 
+    let contagemPalavrasAdivinhadas = 0;
     const teclas = document.querySelectorAll(".linha-teclado button");
 
     // Função para inserir a palavra a ser acertada por meio da API Words
     function pegarNovaPalavra() {
+        // PEGAR PALAVRA PELO BANCO DE PALAVRAS
+        // Inicializando array de palavras (mais palavras no .txt bancoPalavras)
+        let bancoPalavras = ["cigar", "rebut", "sissy", "comet", "jaunt", "enema", "steed", "abyss", "growl", "fling", "dozen", "boozy", "erode", "world", "gouge", "click", "briar", "great"];
+        // Gerando um número aleatório referente a posição da palavra no bancoPalavras
+        let nAleatorio = Math.floor(Math.random() * bancoPalavras.length);
+        // Passando essa palavra para a variável word que vai ser usada como palavra correta
+        word = bancoPalavras[nAleatorio];
+
+        console.log(word);
+
+
+        // PEGAR PALAVRA PELA API
         // Fazendo requisição na API de uma palavra aleatória com mínimo de 5 letrar a máximo de 5 (Adicionar '&?partOfSpeech=verb?' ao final para solicitar somente verbos)
-        fetch(
-                `https://wordsapiv1.p.rapidapi.com/words/?random=true&lettersMin=5&lettersMax=5`, {
-                    method: "GET",
-                    headers: {
-                        "x-rapidapi-host": "wordsapiv1.p.rapidapi.com",
-                        // Chave da API entra aqui
-                        "x-rapidapi-key": "CHAVE_ACESSO_API",
-                    },
-                }
-            )
-            // Pegando resposta e convertendo para .json
-            .then((response) => {
-                return response.json();
-            })
-            // Pegando o resultado e inserindo na variável word
-            .then((res) => {
-                word = res.word;
-            })
-            .catch((err) => {
-                console.error(err);
-            });
+        //     fetch(`https://wordsapiv1.p.rapidapi.com/words/?random=true&lettersMin=5&lettersMax=5`, {
+        //             method: "GET",
+        //             headers: {
+        //                 "x-rapidapi-host": "wordsapiv1.p.rapidapi.com",
+        //                 // Chave da API entra aqui
+        //                 "x-rapidapi-key": "CHAVE_API",
+        //             },
+        //         })
+        //         // Pegando resposta e convertendo para .json
+        //         .then((response) => {
+        //             return response.json();
+        //         })
+        //         // Pegando o resultado e inserindo na variável word
+        //         .then((res) => {
+        //             word = res.word;
+        //         })
+        //         .catch((err) => {
+        //             console.error(err);
+        //         });
+
     }
 
     function pegarPalavraAtualArr() {
@@ -97,46 +108,51 @@ document.addEventListener("DOMContentLoaded", () => {
         // Criando string da palavra atual
         const palavraAtual = palavraAtualArr.join("");
 
-        fetch(`https://wordsapiv1.p.rapidapi.com/words/${palavraAtual}`, {
-                method: "GET",
-                headers: {
-                    "x-rapidapi-host": "wordsapiv1.p.rapidapi.com",
-                    "x-rapidapi-key": "CHAVE_ACESSO_API",
-                },
-            })
-            .then((res) => {
-                if (!res.ok) {
-                    throw Error();
-                }
+        // Verificando se a palavraAtual (palavra inserida pelo usuário existe no banco de dados da API)
+        // fetch(`https://wordsapiv1.p.rapidapi.com/words/${palavraAtual}`, {
+        //         method: "GET",
+        //         headers: {
+        //             "x-rapidapi-host": "wordsapiv1.p.rapidapi.com",
+        //             "x-rapidapi-key": "CHAVE_API",
+        //         },
+        //     })
+        //     .then((res) => {
+        //         if (!res.ok) {
+        //             throw Error();
+        //         }
 
-                const idPrimeiraLetra = contagemPalavrasAdivinhadas * 5 + 1;
-                const intervalo = 200;
-                palavraAtualArr.forEach((letter, index) => {
-                    setTimeout(() => {
-                        const addCorQuadrado = pegarCorQuadrado(letter, index);
+        const idPrimeiraLetra = contagemPalavrasAdivinhadas * 5 + 1;
+        const intervalo = 200;
+        
+        // Validação de tamanho
+        if (palavraAtual.length >= 5) {
+            palavraAtualArr.forEach((letter, index) => {
+                setTimeout(() => {
+                    const addCorQuadrado = pegarCorQuadrado(letter, index);
 
-                        const idLetra = idPrimeiraLetra + index;
-                        const letraEl = document.getElementById(idLetra);
-                        letraEl.classList.add("animate__flipInX");
-                        letraEl.style = `background-color:${addCorQuadrado};border-color:${addCorQuadrado}`;
-                    }, intervalo * index);
-                });
-
-                contagemPalavrasAdivinhadas += 1;
-
-                if (palavraAtual === word) {
-                    window.alert("Congratulations!");
-                }
-
-                if (palavrasAdivinhadas.length === 6) {
-                    window.alert(`Sorry, you have no more guesses! The word is ${word}.`);
-                }
-
-                palavrasAdivinhadas.push([]);
-            })
-            .catch(() => {
-                window.alert("Word is not recognised!");
+                    const idLetra = idPrimeiraLetra + index;
+                    const letraEl = document.getElementById(idLetra);
+                    letraEl.classList.add("animate__flipInX");
+                    letraEl.style = `background-color:${addCorQuadrado};border-color:${addCorQuadrado}`;
+                }, intervalo * index);
             });
+
+            contagemPalavrasAdivinhadas += 1;
+
+            if (palavraAtual === word) {
+                window.alert("Congratulations!");
+            }
+
+            if (palavrasAdivinhadas.length === 6) {
+                window.alert(`Sorry, you have no more guesses! The word is ${word}.`);
+            }
+
+            palavrasAdivinhadas.push([]);
+        }
+        //})
+        //.catch(() => {
+        //    window.alert("Word is not recognised!");
+        //});
     }
 
     // Função para criar o tabuleiro com as casas
